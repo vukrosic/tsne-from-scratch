@@ -1,0 +1,321 @@
+
+=== step1_distances.py ===
+600 pictures, 64 numbers each, from 0.00 (empty square) to 1.00 (full ink)
+picture 36 shows a 3. Its first 8 numbers: 0.00 0.12 0.62 0.88 0.69 0.06 0.00 0.00
+
+its nearest picture is picture 396, a 3
+  square 3: 0.6250 and 0.6875, difference -0.0625, times itself 0.0039
+  square 4: 0.8750 and 1.0000, difference -0.1250, times itself 0.0156
+  square 5: 0.6875 and 0.9375, difference -0.2500, times itself 0.0625
+  all 64 squares added: 0.8633. The root of that: distance 0.93
+picture 5 shows a 7: distance 2.92. The farthest picture: distance 4.01
+
+the 10 nearest pictures of picture 36 show: 3 3 3 3 3 3 3 3 3 8
+at distances: 0.93 0.99 1.26 1.31 1.34 1.37 1.38 1.54 1.62 1.69
+
+all 600 pictures: of the 10 nearest pictures, 91.0 % show the same digit
+a page has room for 2 numbers per dot. A picture has 64
+
+=== step2_keep_distances.py ===
+3 pictures, every pair 1 apart: a triangle with sides 1, 1, 1. Every distance is right.
+4 pictures, every pair 1 apart: the best 4 dots are a square. Sides 0.85, corner to corner 1.21.
+  no 4 dots on a page are all 1 apart. With 64 numbers, 65 pictures can be.
+
+600 dots moved until the distances on the page fit the distances of the pictures as well as they can:
+  a distance on the page is wrong by 28 % on average
+  a picture and its nearest picture: 1.18 apart in the 64 numbers, 0.62 apart on the page
+  of the 10 nearest dots of a dot, 59.3 % show the same digit (in the 64 numbers: 91.0 %)
+  of the 10 nearest dots of a dot, 26.6 % are among its 10 nearest pictures
+
+=== step3_shares.py ===
+picture 36 (a 3), a bell of width 0.50:
+  nearest picture number   1: a 3 at distance 0.93 gets  35.51 %
+  nearest picture number   2: a 3 at distance 0.99 gets  27.66 %
+  nearest picture number  10: a 8 at distance 1.69 gets   0.68 %
+  nearest picture number  30: a 2 at distance 2.04 gets   0.05 %
+  nearest picture number 100: a 9 at distance 2.45 gets   0.00 %
+  the 7 at distance 2.92 gets 0.0000 %. All 599 shares add up to 100 %
+
+the neighbour count of a row of shares: 30 equal shares count as 30, one share of 100 % counts as 1
+  width 0.3: neighbour count 2.2
+  width 0.5: neighbour count 7.1
+  width 0.8: neighbour count 91.6
+  the program tries widths until the count is 30: width 0.669
+narrowest bell: picture 457, width 0.464. Its nearest picture is 1.57 away, its 30th nearest 1.99
+widest bell: picture 145, width 0.865. Its nearest picture is 0.98 away, its 30th nearest 2.56
+
+one table for all pairs: 179700 pairs, the shares add up to 100 %
+an even split would give every pair 0.00056 %. 14942 pairs get more, 164758 pairs get less
+
+=== step4_map.py ===
+start: 600 dots in a small random cloud, 0.058 wide. Dot 36 is at (0.0114, -0.0123)
+
+shares on the page: the same bell, with one width for all dots, over the distance on the page
+  two dots 0.0 apart: weight 1.0000
+  two dots 0.5 apart: weight 0.7788
+  two dots 1.0 apart: weight 0.3679
+  two dots 2.0 apart: weight 0.0183
+  two dots 3.0 apart: weight 0.0001
+  every weight is divided by the sum of all weights: the table of the page adds up to 100 % too
+
+the two tables at the start (percent of the whole table):
+  picture 36 and its nearest picture (picture 396): pictures 0.06844 %, page 0.00056 % -> pulled together
+  picture 36 and the 7 (picture 5): pictures 0.00001 %, page 0.00056 % -> pushed apart
+  the gap adds up, over all pairs: share of the pictures times log(share of the pictures / share of the page)
+  gap at the start: 2.913. Equal tables give 0
+the pull between two dots: 4 times (share of the pictures minus share of the page) times their distance on the page
+  dot 36 and its nearest picture: 0.0326 apart on the page, pull +4.43e-05 (above 0: together)
+  dot 36 and the 7: 0.0287 apart on the page, pull -3.12e-07 (above 0: together)
+  all 599 pulls on dot 36 added: it moves by (+5.51e-06, +1.66e-05) times the step size
+
+every dot moves along its pull, 1,000 times:
+  step    0: gap 2.913, the page is  0.06 wide
+  step    1: gap 2.914, the page is  0.13 wide
+  step   10: gap 2.878, the page is  0.66 wide
+  step   50: gap 1.775, the page is  3.10 wide
+  step  100: gap 1.213, the page is  6.87 wide
+  step  250: gap 1.186, the page is  7.00 wide
+  step 1000: gap 1.186, the page is  7.00 wide
+  (saved map: gap 1.186, largest difference to this run 0.000)
+
+
+                       4444444444444
+                  4 444   44       4   44
+                             4444 4 44 44
+                  4             4   4
+               7 7         4     7           1111
+         7777777777777777747  77    7      811111
+         7 777   7        7   7  77 1      11  91          00
+         7 7                   299                11        000000
+                       181   2    59555 5     0  91      0 0  0 00
+          6        1 11 188    2  555 5 5 555             0  000000 0
+ 6  6 666  6  6    111   812  388  5  55555   555555           0 0  0
+66 666  6  6       111188 8    8     5  5  55 55555           00
+ 6 6  666 6   666  6     88  338   3 8 558 5    5 55            00
+ 6  6   6          8 568 8888 8              5    5  55       9
+666 66 66 6  6       88 88  88       88888      999 999  9
+ 666    666           8     88    88   383 8    959 95 9999 9
+         1           22       8 888 3 83   2 3       559 999
+         1           2 2            333 3 333 9 9     999999
+         1     22   22222            3 3 3  33  3    59  99   9
+          11 1     2  222      2 2     3 3    3 33   9    99
+                 2 22 222     2  223 33 333 3  3339
+                2 222       222            333  39 999
+                   2 2 22  222
+
+of the 10 nearest dots of a dot, 85.2 % show the same digit (keep-every-distance map: 59.3 %, the pictures: 91.0 %)
+of the 10 nearest dots of a dot, 49.4 % are among its 10 nearest pictures (keep-every-distance map: 26.6 %)
+but the digits touch: a dot is 0.57 from the nearest dot of another digit, and the page is 7.0 wide
+
+=== step5_tail.py ===
+weight of two dots on the page:   bell      tail = 1 / (1 + distance x distance)
+     0 apart                    1.000000   1.000000
+     1 apart                    0.367879   0.500000
+     2 apart                    0.018316   0.200000
+     3 apart                    0.000123   0.100000
+    10 apart                    0.000000   0.009901
+    30 apart                    0.000000   0.001110
+
+the first 50 steps use the shares of the pictures times 4: near pictures pull hard and find each other early
+  step    0: gap 2.913, the page is   0.06 wide
+  step    1: gap 2.914, the page is   0.13 wide
+  step   10: gap 2.881, the page is   0.63 wide
+  step   50: gap 1.621, the page is   7.03 wide
+  step  100: gap 0.629, the page is  28.34 wide
+  step  250: gap 0.489, the page is  54.47 wide
+  step 1000: gap 0.464, the page is  94.14 wide
+  (saved map: gap 0.464, largest difference to this run 0.000)
+
+
+                              666666 6666
+                              666666666666
+                               66666665
+                                  66
+
+                                                                 0 0
+           77                                                 0000000
+        7777777 7            555555 555555                    0000000
+         777777777      999  5 5 555555555  5               9 0000 0
+  4  4     7777777777        1   5   555  5555
+ 44444           7 2    3                     99999
+444444                  3                 99999999999
+4444 444             88888888       888    9 99 9999
+  444             1181 888 88 88  88888  339  335 9 99
+     999         11111111 88   88  88    33333333 33
+          11 1    111    88 8    8          33333 39
+         111118         22 8                   3333
+         111                      2            3333
+                              22222222 2
+                               2 2222  2222
+                               2 22222222 222
+
+                                1111
+
+the program never read which digit a picture shows. The digits are written on the dots afterwards.
+                              keep distances   bell on the page   tail on the page   (the pictures)
+same digit, 10 nearest dots         59.3 %            85.2 %             94.8 %          91.0 %
+10 nearest pictures kept            26.6 %            49.4 %             67.3 %
+bell: a dot is 0.10 from its nearest dot and 0.57 from the nearest dot of another digit: 5.9 times as far
+tail: a dot is 1.03 from its nearest dot and 8.06 from the nearest dot of another digit: 7.9 times as far
+picture of the map: files/map.svg
+
+=== step6_lies.py ===
+1. THE SIZE OF AN ISLAND
+   made-up pictures: 300 copies of one 3 with small changes, 300 copies of one 7 with changes 10 times as big
+   in the 64 numbers: the 3 group is 0.133 wide, the 7 group 1.114 wide: 8.4 times as wide
+   on the map:        the 3 group is 7.29 wide, the 7 group 7.33 wide: 1.01 times as wide
+   why: every bell is set to 30 neighbours. Mean width of a bell: 0.032 in the 3 group, 0.269 in the 7 group
+   the real digits: the zeros are 1.16 wide in the 64 numbers and the ones 1.96 (1.7 times). On the map: 3.6 and 15.5 (4.2 times)
+
+2. WHICH ISLAND LIES NEXT TO WHICH
+   the same pictures, the same program, five different random clouds at the start:
+   start   gap     same digit   pictures kept   island nearest to the island of 0 1 2 3 4 5 6 7 8 9
+   0      0.464     94.8 %        67.3 %                                        9 8 3 9 7 9 5 4 1 3   (5 of 10 as in the pictures)
+   1      0.460     94.5 %        67.2 %                                        5 8 3 9 7 9 5 4 1 3   (4 of 10 as in the pictures)
+   2      0.468     95.4 %        67.2 %                                        3 2 1 9 7 9 4 4 1 3   (3 of 10 as in the pictures)
+   3      0.467     94.9 %        67.2 %                                        9 8 8 9 7 9 4 1 1 3   (6 of 10 as in the pictures)
+   4      0.467     95.4 %        67.1 %                                        9 8 1 9 7 9 2 4 1 3   (5 of 10 as in the pictures)
+   in the 64 numbers, the group nearest to the group of 0 1 2 3 4 5 6 7 8 9:         9 8 8 9 1 8 8 8 1 3
+   the near dots stay: of the 10 nearest dots of a dot on map 0, 89.9 % are among its 10 nearest on map 1
+
+3. THE NEIGHBOUR COUNT IS YOUR CHOICE
+   count   gap     same digit   pictures kept   the page is
+     2    0.619     89.8 %        54.4 %         191.1 wide
+     5    0.578     95.2 %        62.2 %         174.3 wide
+    30    0.464     94.8 %        67.3 %          94.1 wide
+   100    0.401     92.8 %        65.8 %          27.6 wide
+   300    0.240     87.5 %        50.8 %           7.6 wide
+
+   count 2:
+
+                             11 11111
+                    66
+                            1    5      5555          55
+                4   4        555 555 5  5   5       5 55
+       9            44 44         5    555 55 5    5
+       9     2222       44 44        55                   00
+               222      00        8        2     3     0 000 0 0
+9 9      111               888    88    2    2333       0   000
+          11    111 1 888   888  88           333      00   00
+    7        18  18        88    66     9999            0         333
+    7    2        8     66       666       9999  999
+99             77     66666 66   6   6        99  9  999  9  3333
+     777777   77          6  6 66666  6                  33  333  3
+          7777  777       6    5         666  6                3
+                   777 7 77       44 44            4
+    99             777 7        22        3      4444 4 4
+         11  18                     22                           8
+             1    11       88 8        22222       2
+             111         88 888        222   2  222
+
+   count 300:
+
+                              6 6      6
+                     6666666666666         44  44 4 4
+                      66666 66666 6        4  4 4 44  4        9
+        00 0           6666 6666  66        4444 44   4    99      1
+    0 000000 0     0        566              4444  4       9  1   1
+    0 0000000          5   6 5       8       44444         8 111111 1
+   0  0                8555 55   555 5          44  4        11 1   1
+     9      595     55555555555 5 5 5   5            7    77
+   99 9  5995 999 5 8      858  5  555 5555    99   77  7 7      2  2
+9   9 95 999  999     888 8    8        5559     9  34 7777  7
+  9999993  9  3 3  8 8888 8   8  8 8    8 5 8    3 8  77 77 777
+9  9 39 33 3  393      8 888   8 8  888  88888833      7 7777
+99 93  3  333393  3 3     888 8  8 8 8 881 8 1 2 1 1    7 77 7
+      33  3  3     3 3             88 8  1111111         7  77
+       3  33333          222 22  22   88   1 111         777
+   2 2                   2 22   2 2         1 11
+          22   2 2222  2222222 2   2
+               2  2  2 2   2  2       1
+                               111111
+
+   600 pictures of noise: every square is a random number. There are no groups.
+   in the 64 numbers: the nearest picture is 2.54 away, the farthest 3.94
+   nearest dot / 10th nearest dot. 600 dots thrown on a page at random: 0.27
+   map of the noise, count 30: 0.28
+   map of the noise, count  2: 0.11
+
+   noise, count 2:
+
+                                 **      *
+                       ****                   *
+                            **     *    **      **
+               *   ****          ***       ***  **  *
+                 ******      *        **** **
+                 *   *     ***** **** **   ***    ***    **
+    *       *  **   ***  *  *    *   *    ***
+          *****           *** **   * ** ***      ********     *
+*              **  ***   ** *   **          ***   *  *
+          **   *****    **  *   *    ****  *  **    **    **     *
+     **       *    **      ** **   *    ** ***  *** **     **
+      *      ***    ***   * *****   ****    *    ***      *    *    *
+       ***      *     ***   ***  *        ***   ***
+         **    ***  *** **   *  **    **  **   *** *     *
+                   ****    **    *     ***               **
+             ***    *                    *    ***
+                       *  ** ***   *      *
+                                 ***     **
+                              *
+
+=== tests.py ===
+ok    600 pictures, 64 numbers each, every number from 0 to 1
+ok    every digit has 49 to 69 pictures: [49, 62, 63, 55, 50, 67, 67, 56, 69, 62]
+ok    two dots at (0, 0) and (3, 4) are 5 apart: on 2 numbers the distance is the ruler
+ok    picture 36 is a 3, its nearest picture 396 is a 3, 0.93 away. Square by square gives the same as the fast way
+ok    its 10 nearest pictures are nine 3s and one 8; the 7 is 2.92 away
+ok    in the 64 numbers, 91.0 % of the 10 nearest pictures show the same digit
+ok    4 dots for 4 pictures that are all 1 apart: a square with sides 0.85, corner to corner 1.21, has the smallest error
+ok    65 rows of 64 numbers can be all 1 apart (2080 pairs, from 1.000000 to 1.000000)
+ok    keep every distance: a distance is wrong by 28 % on average; same digit 59.3 %, pictures kept 26.6 %
+ok    100 steps of it made now: wrong by 29 % (the saved map had 600 steps)
+ok    a row of shares adds up to 100 % and a picture gives itself 0: 1.0000
+ok    a nearer picture never gets a smaller share
+ok    with a bell of width 0.5 the nearest picture gets 35.5 % and the 7 gets less than 0.0001 %
+ok    neighbour count: 30 equal shares count as 30, 7 equal shares as 7, one share as 1
+ok    the width for picture 36 is 0.669, and its shares then count as 30.00 neighbours
+ok    widths from 0.464 to 0.865; every picture has 30 neighbours
+ok    the table of all pairs adds up to 100 %, is the same from both sides, and has 0 for a picture with itself
+ok    bell: the shares of the page add up to 100 %, and moving a dot along its pull makes the gap smaller (pull = minus the slope, off by 1e-07)
+ok    tail: the shares of the page add up to 100 %, and moving a dot along its pull makes the gap smaller (pull = minus the slope, off by 5e-08)
+ok    equal tables have gap 0, different tables a gap above 0
+ok    gap: 2.913 at the start, 1.186 with the bell on the page, 0.464 with the tail
+ok    bell: same digit 85.2 %, pictures kept 49.4 %
+ok    tail: same digit 94.8 %, pictures kept 67.3 %. The page is 94 wide, the bell page 7
+ok    a map made now: gap 0.464, same digit 94.8 % (other computers round differently, so the dots may sit elsewhere)
+ok    the same start gives the same map on this computer
+ok    made-up groups: one is 8.4 times as wide as the other in the 64 numbers and 1.01 times on the map
+ok    five starts: gaps [0.4637, 0.4599, 0.4676, 0.4669, 0.4672]
+ok    five starts: same digit [94.8, 94.5, 95.4, 94.9, 95.4] percent
+ok    five starts: the island nearest to the zeros shows the digit [9, 5, 3, 9, 9]
+ok    island neighbours that are also the nearest groups in the 64 numbers: [5, 4, 3, 6, 5] of 10
+ok    of the 10 nearest dots of a dot on map 0, 89.9 % are among its 10 nearest on map 1
+ok    neighbour count and same digit: [(2, 89.8), (5, 95.2), (30, 94.8), (100, 92.8), (300, 87.5)]
+ok    nearest dot / 10th nearest dot: random dots 0.27, map of noise at count 30 0.28, at count 2 0.11
+ok    the exercise: group C is 10.0 times as far from A as B is
+
+ALL TESTS PASS (34 of 34)
+
+=== exercise.py ===
+in the 64 numbers: A to B 1.00, A to C 10.00: C is 10.0 times as far. Every group is 0.24 wide
+map with neighbour count 30, start 0: A to B 46.5, A to C 46.4: C is 1.00 times as far (gap 1.320)
+map with neighbour count 30, start 1: A to B 45.9, A to C 47.4: C is 1.03 times as far (gap 1.310)
+
+
+                       BBBBBBBBBBBBB
+                      BBBBBBBBBBBBBBBB
+                       BBBBBBBBBBBBBB
+                        BBBBBBBBBB B
+
+
+
+
+
+
+
+                                                        A AAAAAAA A
+                                                      AAAAAAAAAAAAAAA
+  CCCCCCCCC                                           A AAAAAAAAAAAAA
+CCCCCCCCCCCCCCC                                        AAAAAAAAAAAAA
+CCCCCCCCCCCCCCC                                               A
+ C CCCCCCCCCCC
